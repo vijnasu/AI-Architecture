@@ -342,6 +342,286 @@ flowchart TB
 
 This is the current version in the main diagram above, with improved readability, color coding, and mouse-friendly pan/zoom enabled.
 
+## Additional Cloud-Native Variants
+
+### 4) AWS-Native Architecture
+
+```mermaid
+%%{init: {'theme': 'default', 'themeVariables': { 'primaryColor': '#F3F9FF', 'primaryTextColor': '#102A43', 'primaryBorderColor': '#2F6FED', 'lineColor': '#486581', 'secondaryColor': '#FFF3D6', 'tertiaryColor': '#E8F5E9'}}}%%
+flowchart TB
+    subgraph Client["Clients"]
+        U1["Web / Mobile Apps"]
+        U2["Internal Portal"]
+        U3["B2B API Clients"]
+    end
+
+    subgraph Security["AWS Security & Access"]
+        APIGW["API Gateway"]
+        WAF["AWS WAF / CloudFront"]
+        COG["Amazon Cognito"]
+        IAM["IAM / AWS Organizations"]
+        DLP["Macie / GuardDuty / Config"]
+    end
+
+    subgraph Runtime["AI Application Runtime"]
+        ORCH["EKS / ECS / Fargate"]
+        ROUTER{"Model Router<br/>(cost, latency, policy)"}
+        CACHE["ElastiCache / Redis"]
+        PROMPT["Prompt & Guardrail Service"]
+    end
+
+    subgraph RAG["RAG Layer"]
+        DS1["S3 / Document Storage"]
+        CHUNK["Document Parsing & Chunking"]
+        EMBED["Embedding Service"]
+        VDB[("OpenSearch Serverless / Bedrock Knowledge Base")]
+        RETRIEVER["Retriever + Reranker"]
+    end
+
+    subgraph Models["Model Layer"]
+        EXT["Amazon Bedrock<br/>Claude / Titan / Nova"]
+        LOCAL["SageMaker / EKS<br/>Self-hosted LLM"]
+        GPU["GPU-backed Training / Inference"]
+    end
+
+    subgraph Data["Enterprise Data Sources"]
+        SQL[("RDS / Aurora")]
+        DOCS[("S3 / SharePoint / Salesforce")]
+        SAP[("SAP / ERP APIs")]
+    end
+
+    subgraph Governance["Observability & Governance"]
+        LOG["CloudWatch / X-Ray"]
+        MON["Cost Explorer"]
+        AUDIT["AWS Audit Manager / Security Hub"]
+    end
+
+    U1 --> APIGW
+    U2 --> APIGW
+    U3 --> APIGW
+    APIGW --> WAF
+    WAF --> COG
+    COG --> IAM
+    IAM --> DLP
+    DLP --> ORCH
+
+    ORCH --> PROMPT
+    ORCH --> CACHE
+    ORCH --> ROUTER
+    ORCH --> RETRIEVER
+
+    DS1 --> CHUNK --> EMBED --> VDB
+    SQL --> CHUNK
+    DOCS --> CHUNK
+    SAP --> CHUNK
+    VDB --> RETRIEVER --> ORCH
+
+    ROUTER --> LOCAL
+    ROUTER --> EXT
+    LOCAL --> GPU
+    EXT --> ORCH
+    LOCAL --> ORCH
+
+    ORCH --> APIGW
+    APIGW --> U1
+    APIGW --> U2
+    APIGW --> U3
+
+    ORCH -.-> LOG
+    ROUTER -.-> MON
+    ORCH -.-> AUDIT
+```
+
+### 5) GCP-Native Architecture
+
+```mermaid
+%%{init: {'theme': 'default', 'themeVariables': { 'primaryColor': '#F0FDF4', 'primaryTextColor': '#102A43', 'primaryBorderColor': '#16A34A', 'lineColor': '#486581', 'secondaryColor': '#EFF6FF', 'tertiaryColor': '#ECFCCB'}}}%%
+flowchart TB
+    subgraph Client["Clients"]
+        U1["Web / Mobile Apps"]
+        U2["Internal Portal"]
+        U3["B2B API Clients"]
+    end
+
+    subgraph Security["Google Cloud Security"]
+        LB["Cloud Load Balancer"]
+        GATEWAY["API Gateway / IAP"]
+        IAM["IAM / Identity Platform"]
+        DLP["Cloud DLP / Security Command Center"]
+    end
+
+    subgraph Runtime["AI Application Runtime"]
+        ORCH["Cloud Run / GKE"]
+        ROUTER{"Model Router<br/>(latency, policy, cost)"}
+        CACHE["Redis / Memorystore"]
+        PROMPT["Prompt & Policy Layer"]
+    end
+
+    subgraph RAG["RAG Layer"]
+        DOCS["Cloud Storage / BigQuery"]
+        CHUNK["Document Processing"]
+        EMBED["Embedding Service"]
+        VDB[("Vertex AI Search / Vector Index")]
+        RETRIEVER["Retriever + Reranker"]
+    end
+
+    subgraph Models["Model Layer"]
+        EXT["Vertex AI / Gemini"]
+        LOCAL["GKE + GPUs<br/>Self-hosted LLM"]
+    end
+
+    subgraph Data["Enterprise Data Sources"]
+        SQL[("Cloud SQL / Spanner")]
+        DRIVE[("Drive / SharePoint / ERP")]
+    end
+
+    subgraph Governance["Monitoring & Governance"]
+        LOG["Cloud Logging / Monitoring"]
+        EVAL["Vertex AI Eval"]
+        AUDIT["Security Command Center"]
+    end
+
+    U1 --> LB
+    U2 --> LB
+    U3 --> LB
+    LB --> GATEWAY
+    GATEWAY --> IAM
+    IAM --> DLP
+    DLP --> ORCH
+
+    ORCH --> PROMPT
+    ORCH --> CACHE
+    ORCH --> ROUTER
+    ORCH --> RETRIEVER
+
+    DOCS --> CHUNK --> EMBED --> VDB
+    SQL --> CHUNK
+    DRIVE --> CHUNK
+    VDB --> RETRIEVER --> ORCH
+
+    ROUTER --> EXT
+    ROUTER --> LOCAL
+    EXT --> ORCH
+    LOCAL --> ORCH
+
+    ORCH --> LB
+    LB --> U1
+    LB --> U2
+    LB --> U3
+
+    ORCH -.-> LOG
+    ORCH -.-> EVAL
+    ORCH -.-> AUDIT
+```
+
+### 6) Executive-Friendly “CIO View”
+
+```mermaid
+%%{init: {'theme': 'default', 'themeVariables': { 'primaryColor': '#F8FAFC', 'primaryTextColor': '#0F172A', 'primaryBorderColor': '#334155', 'lineColor': '#64748B', 'secondaryColor': '#E2E8F0', 'tertiaryColor': '#E0F2FE'}}}%%
+flowchart LR
+    B1["Business Apps"] --> A1["AI Platform"]
+    A1 --> D1["Enterprise Knowledge"]
+    A1 --> M1["LLM Model Layer"]
+    M1 --> E1["External LLMs"]
+    M1 --> L1["Private / Local LLMs"]
+    D1 --> R1["RAG / Retrieval"]
+    A1 --> G1["Governance & Security"]
+    G1 --> C1["Compliance / Audit"]
+    G1 --> O1["Observability / Cost"]
+    A1 --> B2["Business Outcomes"]
+    D1 --> B2
+
+    classDef business fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef platform fill:#e9d5ff,stroke:#7c3aed,stroke-width:2px,color:#2e1065;
+    classDef data fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d;
+    classDef model fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#451a03;
+    classDef gov fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006;
+
+    class B1,B2 business;
+    class A1,R1 platform;
+    class D1 data;
+    class M1,E1,L1 model;
+    class G1,C1,O1 gov;
+```
+
+### 7) Deeper Deployment Topology with VNet, Private Endpoints, and Network Zones
+
+```mermaid
+%%{init: {'theme': 'default', 'themeVariables': { 'primaryColor': '#EFF6FF', 'primaryTextColor': '#0F172A', 'primaryBorderColor': '#2563EB', 'lineColor': '#475569', 'secondaryColor': '#F0FDF4', 'tertiaryColor': '#FEF3C7'}}}%%
+flowchart TB
+    subgraph Internet["Public Internet"]
+        U1["Users / Apps"]
+    end
+
+    subgraph Edge["Edge & Access Layer"]
+        LB["Azure Front Door / WAF"]
+        APIM["API Management"]
+        ID["Entra ID / IAM"]
+    end
+
+    subgraph DMZ["DMZ / Network Boundary"]
+        GW["Ingress Gateway"]
+        NAT["NAT / Firewall"]
+    end
+
+    subgraph VNet["Virtual Network (Private)]
+        subgraph AppSubnet["Application Tier"]
+            APP["AI App / Agent Runtime"]
+            ORCH["Model Router / Service Mesh"]
+        end
+
+        subgraph AISubnet["AI / Compute Tier"]
+            LLM["Private LLM Runtime"]
+            GPU["GPU Cluster"]
+        end
+
+        subgraph DataSubnet["Data & Retrieval Tier"]
+            AISEARCH["AI Search / Vector DB"]
+            SQL["Azure SQL / Cosmos DB"]
+            KV["Key Vault"]
+        end
+
+        subgraph GovSubnet["Observability & Security"]
+            LOG["Log Analytics / App Insights"]
+            PURVIEW["Purview / Defender"]
+        end
+    end
+
+    subgraph PE["Private Endpoints / Private Link"]
+        PE1["Private Endpoint: SQL"]
+        PE2["Private Endpoint: Storage"]
+        PE3["Private Endpoint: AI Search"]
+        PE4["Private Endpoint: Key Vault"]
+    end
+
+    subgraph Zones["Availability Zones"]
+        Z1["Zone 1"]
+        Z2["Zone 2"]
+        Z3["Zone 3"]
+    end
+
+    U1 --> LB --> APIM --> ID
+    ID --> GW --> NAT --> APP
+    APP --> ORCH
+    ORCH --> LLM
+    LLM --> GPU
+    ORCH --> AISEARCH
+    ORCH --> SQL
+    APP --> KV
+
+    SQL --> PE1
+    AISEARCH --> PE3
+    KV --> PE4
+    PE2 --> APP
+
+    APP --> LOG
+    ORCH --> PURVIEW
+
+    Z1 --> APP
+    Z2 --> ORCH
+    Z3 --> LLM
+```
+
 ## Layer Descriptions
 
 ### Client Layer
