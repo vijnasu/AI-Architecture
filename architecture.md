@@ -564,7 +564,7 @@ flowchart TB
         NAT["NAT / Firewall"]
     end
 
-    subgraph VNet["Virtual Network (Private)]
+    subgraph VNet["Virtual Network (Private)"]
         subgraph AppSubnet["Application Tier"]
             APP["AI App / Agent Runtime"]
             ORCH["Model Router / Service Mesh"]
@@ -621,6 +621,22 @@ flowchart TB
     Z2 --> ORCH
     Z3 --> LLM
 ```
+
+## Cloud Platform Comparison Matrix
+
+| Capability | Azure | AWS | GCP |
+|---|---|---|---|
+| Identity & access | Microsoft Entra ID | Cognito + IAM | IAM + Identity Platform |
+| Edge / ingress | Azure Front Door, API Management | CloudFront, API Gateway | Cloud Load Balancer, API Gateway / IAP |
+| App runtime | Container Apps, AKS | EKS, ECS, Fargate | Cloud Run, GKE |
+| Managed model layer | Azure OpenAI, Azure AI Foundry | Bedrock | Vertex AI, Gemini |
+| Private / local models | Azure ML + AKS + GPU | SageMaker + EKS + GPU | GKE + GPU |
+| Vector / RAG store | Azure AI Search | OpenSearch Serverless, Bedrock KB | Vertex AI Search, Vector Index |
+| Structured data | Azure SQL, Cosmos DB | RDS, Aurora | Cloud SQL, Spanner |
+| Object / document storage | ADLS, SharePoint | S3 | Cloud Storage |
+| Governance | Purview, Defender | GuardDuty, Security Hub | Security Command Center |
+| Observability | App Insights, Log Analytics | CloudWatch, X-Ray | Cloud Logging, Monitoring |
+| Network isolation | VNet + Private Endpoints | VPC + PrivateLink | VPC + Private Service Connect |
 
 ## Layer Descriptions
 
