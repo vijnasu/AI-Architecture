@@ -8,67 +8,68 @@ End-to-end reference architecture combining external LLM providers, self-hosted/
 %%{init: {'theme': 'default', 'themeVariables': { 'primaryColor': '#EAF2FF', 'primaryTextColor': '#102A43', 'primaryBorderColor': '#2F6FED', 'lineColor': '#486581', 'secondaryColor': '#FFF3D6', 'tertiaryColor': '#E8F5E9'}}}%%
 flowchart TB
     subgraph Client["Client Layer"]
-        U1["Web / Mobile App"]
-        U2["Internal Tools / Copilot Plugins"]
-        U3["Third-Party API Consumers"]
+        U1["Azure App Service / Web App"]
+        U2["Copilot / Internal Portal"]
+        U3["B2B API Clients"]
     end
 
-    subgraph Gateway["API Gateway & Security"]
-        GW["API Gateway<br/>(Auth, Rate Limiting, WAF)"]
-        IAM["IAM / SSO / OAuth2"]
-        DLP["PII Redaction / DLP Filter"]
+    subgraph Gateway["Azure API & Security"]
+        GW["Azure API Management"]
+        WAF["Azure Front Door / WAF"]
+        IAM["Microsoft Entra ID"]
+        DLP["Microsoft Purview / DLP"]
     end
 
-    subgraph Orchestration["Orchestration Layer"]
-        ORCH["AI Orchestrator<br/>(LangChain / Semantic Kernel / Custom)"]
-        ROUTER{"Model Router<br/>(policy, cost, latency, sensitivity)"}
-        CACHE["Semantic Cache"]
-        PROMPT["Prompt Template & Guardrails Engine"]
+    subgraph Orchestration["AI Orchestration"]
+        ORCH["Azure Container Apps / AKS<br/>App Runtime"]
+        ROUTER{"Model Router<br/>(policy, latency, cost, sensitivity)"}
+        CACHE["Redis / Semantic Cache"]
+        PROMPT["Prompt & Guardrails Engine"]
     end
 
     subgraph RAG["RAG Pipeline"]
         direction TB
         subgraph Ingestion["Data Ingestion"]
-            LOAD["Document Loaders<br/>(SharePoint, Confluence, DBs, Files)"]
-            CHUNK["Chunking & Preprocessing"]
-            EMBED_IDX["Embedding Model<br/>(Indexing)"]
+            LOAD["Azure AI Document Intelligence<br/>SharePoint / ADLS / SQL Connectors"]
+            CHUNK["Chunking / Enrichment"]
+            EMBED_IDX["Embedding Model<br/>(Azure OpenAI / Model Catalog)"]
         end
-        VDB[("Vector Database<br/>(Azure AI Search / Pinecone / pgvector)")]
-        RETRIEVER["Retriever<br/>(hybrid search + reranking)"]
-        EMBED_Q["Embedding Model<br/>(Query)"]
+        VDB[("Azure AI Search<br/>Vector + Hybrid Search")]
+        RETRIEVER["Retriever + Reranker"]
+        EMBED_Q["Query Embedding Model"]
     end
 
     subgraph Models["Model Layer"]
-        subgraph LocalLLM["Local / Private LLMs"]
-            L1["Self-Hosted LLM<br/>(Llama, Mistral, Phi via vLLM/TGI)"]
-            L2["Fine-Tuned Domain Model"]
-            GPU["GPU Cluster / On-Prem Inference"]
+        subgraph LocalLLM["Private / Local Models"]
+            L1["Azure ML / AKS<br/>Self-hosted LLM"]
+            L2["Fine-tuned Domain Model"]
+            GPU["NVIDIA GPU Nodes"]
         end
-        subgraph ExternalLLM["External LLM Providers"]
-            E1["OpenAI / Azure OpenAI"]
-            E2["Anthropic Claude"]
-            E3["Google Gemini"]
+        subgraph ExternalLLM["External / Managed Models"]
+            E1["Azure OpenAI"]
+            E2["Azure AI Foundry Models"]
         end
     end
 
     subgraph DataSources["Enterprise Data Sources"]
-        DS1[("Structured DB<br/>(SQL/NoSQL)")]
-        DS2[("Document Stores<br/>(SharePoint, Wiki)")]
-        DS3[("APIs / SaaS Systems")]
+        DS1[("Azure SQL / Cosmos DB")]
+        DS2[("SharePoint / OneDrive / ADLS")]
+        DS3[("SAP / Salesforce / APIs")]
     end
 
-    subgraph Governance["Observability, Governance & Ops"]
-        LOG["Logging & Tracing<br/>(OpenTelemetry)"]
-        EVAL["Evaluation & Feedback Loop"]
-        MON["Cost & Usage Monitoring"]
-        AUDIT["Compliance / Audit Trail"]
+    subgraph Governance["Observability & Governance"]
+        LOG["Application Insights<br/>Log Analytics"]
+        EVAL["Evaluation / Feedback Loop"]
+        MON["Azure Cost Management"]
+        AUDIT["Microsoft Purview / Defender"]
     end
 
     U1 --> GW
     U2 --> GW
     U3 --> GW
-    GW --> IAM
-    GW --> DLP
+    GW --> WAF
+    WAF --> IAM
+    IAM --> DLP
     DLP --> ORCH
 
     ORCH --> PROMPT
@@ -82,15 +83,14 @@ flowchart TB
     DS1 --> LOAD
     DS2 --> LOAD
     DS3 --> LOAD
-    RETRIEVER -- "augmented context" --> ORCH
+    RETRIEVER -- "grounded context" --> ORCH
 
-    ROUTER -- "sensitive / offline data" --> L1
-    ROUTER -- "general / high-capability tasks" --> E1
+    ROUTER -- "sensitive / offline / regulated" --> L1
+    ROUTER -- "general-purpose / high-capability" --> E1
     L1 --- GPU
     L2 --- GPU
     E1 --> ORCH
     E2 --> ORCH
-    E3 --> ORCH
     L1 --> ORCH
     L2 --> ORCH
     ORCH --> GW
@@ -114,12 +114,12 @@ flowchart TB
     classDef gov fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006;
 
     class U1,U2,U3 client;
-    class GW,IAM,DLP gateway;
+    class GW,WAF,IAM,DLP gateway;
     class ORCH,ROUTER,CACHE,PROMPT orch;
     class LOAD,CHUNK,EMBED_IDX,RETRIEVER,EMBED_Q ragProc;
     class VDB ragStore;
     class L1,L2,GPU local;
-    class E1,E2,E3 external;
+    class E1,E2 external;
     class DS1,DS2,DS3 datasource;
     class LOG,EVAL,MON,AUDIT gov;
 ```
