@@ -342,6 +342,33 @@ flowchart TB
 
 This is the current version in the main diagram above, with improved readability, color coding, and mouse-friendly pan/zoom enabled.
 
+## Standardized AI SDLC
+
+A standardized AI SDLC is the repeatable lifecycle used to design, build, validate, deploy, and govern enterprise AI systems with traceability and controls.
+
+```mermaid
+flowchart LR
+    A["1. Business Goal & Risk"] --> B["2. Data & Governance"]
+    B --> C["3. Model Selection"]
+    C --> D["4. RAG / Prompting"]
+    D --> E["5. Evaluation & Testing"]
+    E --> F["6. Secure Deployment"]
+    F --> G["7. Monitoring & Feedback"]
+    G --> A
+
+    classDef stage fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#082f49;
+    class A,B,C,D,E,F,G stage;
+```
+
+In practice, this lifecycle sits across the platform architecture as follows:
+- Business goal and risk classification happen before model routing and deployment.
+- Data and governance are enforced before, during, and after ingestion into the RAG pipeline.
+- Model selection is handled by the model router between private/local and external/managed LLMs.
+- Prompting, grounding, and retrieval are orchestrated through the RAG and guardrails layer.
+- Evaluation and testing happen before release, using scoring, human feedback, and safety checks.
+- Secure deployment is enforced through API gateway, identity, WAF, DLP, and audit controls.
+- Monitoring and feedback close the loop with telemetry, cost tracking, drift detection, and content refresh.
+
 ## Additional Cloud-Native Variants
 
 ### 4) AWS-Native Architecture
