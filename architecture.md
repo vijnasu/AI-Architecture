@@ -1,8 +1,20 @@
-# Enterprise AI Architecture — External LLMs, Local LLMs & RAG
+# Enterprise AI Architecture: External LLMs, Local LLMs, and RAG
 
-End-to-end reference architecture combining external LLM providers, self-hosted/local LLMs, and a Retrieval-Augmented Generation (RAG) pipeline for enterprise use.
+End-to-end reference architecture combining external managed LLMs, private or self-hosted LLMs, and a Retrieval-Augmented Generation (RAG) pipeline for enterprise use.
 
-## Diagram
+## Contents
+
+- [Reference Architecture](#reference-architecture)
+- [Architecture Evolution](#architecture-evolution)
+- [Standardized AI SDLC](#standardized-ai-sdlc)
+- [Cloud-Native Variants](#cloud-native-variants)
+- [Executive CIO View](#executive-cio-view)
+- [Deployment Topology](#deployment-topology)
+- [Cloud Platform Comparison](#cloud-platform-comparison)
+- [Architecture Layers](#architecture-layers)
+- [Routing Logic](#routing-logic)
+
+## Reference Architecture
 
 ```mermaid
 %%{init: {
@@ -141,9 +153,9 @@ flowchart TB
     class LOG,EVAL,MON,AUDIT gov;
 ```
 
-## Diagram Evolution
+## Architecture Evolution
 
-### 1) Original Generic Architecture
+### Original Generic Architecture
 
 ```mermaid
 flowchart TB
@@ -240,7 +252,7 @@ flowchart TB
     GW -.-> AUDIT
 ```
 
-### 2) Improved Azure Architecture
+### Improved Azure Architecture
 
 ```mermaid
 %%{init: {'theme': 'default', 'themeVariables': { 'primaryColor': '#EAF2FF', 'primaryTextColor': '#102A43', 'primaryBorderColor': '#2F6FED', 'lineColor': '#486581', 'secondaryColor': '#FFF3D6', 'tertiaryColor': '#E8F5E9'}}}%%
@@ -338,10 +350,6 @@ flowchart TB
     GW -.-> AUDIT
 ```
 
-### 3) Final Polished Interactive Version
-
-This is the current version in the main diagram above, with improved readability, color coding, and mouse-friendly pan/zoom enabled.
-
 ## Standardized AI SDLC
 
 A standardized AI SDLC is the repeatable lifecycle used to design, build, validate, deploy, and govern enterprise AI systems with traceability and controls.
@@ -360,14 +368,15 @@ flowchart LR
     class A,B,C,D,E,F,G stage;
 ```
 
-In practice, this lifecycle sits across the platform architecture as follows:
-- Business goal and risk classification happen before model routing and deployment.
-- Data and governance are enforced before, during, and after ingestion into the RAG pipeline.
-- Model selection is handled by the model router between private/local and external/managed LLMs.
-- Prompting, grounding, and retrieval are orchestrated through the RAG and guardrails layer.
-- Evaluation and testing happen before release, using scoring, human feedback, and safety checks.
-- Secure deployment is enforced through API gateway, identity, WAF, DLP, and audit controls.
-- Monitoring and feedback close the loop with telemetry, cost tracking, drift detection, and content refresh.
+This lifecycle governs the platform continuously rather than acting as a one-time project checklist:
+
+- Business goals and risk classification precede model routing and deployment.
+- Data governance applies before, during, and after RAG ingestion.
+- Model selection is handled by the router across private and managed LLMs.
+- Prompting, grounding, and retrieval are controlled by the guardrails layer.
+- Evaluation uses automated scoring, human feedback, and safety checks before release.
+- Secure deployment uses the gateway, identity, WAF, DLP, and audit controls.
+- Monitoring closes the loop through telemetry, cost tracking, drift detection, and content refresh.
 
 ### SDLC Overlay on the Azure Architecture
 
@@ -416,11 +425,11 @@ flowchart LR
     class P7 obs;
 ```
 
-This overlay makes the SDLC visible as a lifecycle that governs the architecture rather than as a disconnected process. The platform provides the execution path, while the SDLC governs data, model choice, evaluation, deployment, and continuous improvement.
+This overlay shows the SDLC as the operating model that governs the platform. The architecture provides the execution path; the SDLC governs data, model choice, evaluation, deployment, and continuous improvement.
 
-## Additional Cloud-Native Variants
+## Cloud-Native Variants
 
-### 4) AWS-Native Architecture
+### AWS-Native Architecture
 
 ```mermaid
 %%{init: {'theme': 'default', 'themeVariables': { 'primaryColor': '#F3F9FF', 'primaryTextColor': '#102A43', 'primaryBorderColor': '#2F6FED', 'lineColor': '#486581', 'secondaryColor': '#FFF3D6', 'tertiaryColor': '#E8F5E9'}}}%%
@@ -508,7 +517,7 @@ flowchart TB
     ORCH -.-> AUDIT
 ```
 
-### 5) GCP-Native Architecture
+### GCP-Native Architecture
 
 ```mermaid
 %%{init: {'theme': 'default', 'themeVariables': { 'primaryColor': '#F0FDF4', 'primaryTextColor': '#102A43', 'primaryBorderColor': '#16A34A', 'lineColor': '#486581', 'secondaryColor': '#EFF6FF', 'tertiaryColor': '#ECFCCB'}}}%%
@@ -590,7 +599,7 @@ flowchart TB
     ORCH -.-> AUDIT
 ```
 
-### 6) Executive-Friendly “CIO View”
+## Executive CIO View
 
 ```mermaid
 %%{init: {'theme': 'default', 'themeVariables': { 'primaryColor': '#F8FAFC', 'primaryTextColor': '#0F172A', 'primaryBorderColor': '#334155', 'lineColor': '#64748B', 'secondaryColor': '#E2E8F0', 'tertiaryColor': '#E0F2FE'}}}%%
@@ -620,7 +629,9 @@ flowchart LR
     class G1,C1,O1 gov;
 ```
 
-### 7) Deeper Deployment Topology with VNet, Private Endpoints, and Network Zones
+## Deployment Topology
+
+The following topology adds private networking, subnet boundaries, private endpoints, and availability zones for a regulated Azure deployment.
 
 ```mermaid
 %%{init: {'theme': 'default', 'themeVariables': { 'primaryColor': '#EFF6FF', 'primaryTextColor': '#0F172A', 'primaryBorderColor': '#2563EB', 'lineColor': '#475569', 'secondaryColor': '#F0FDF4', 'tertiaryColor': '#FEF3C7'}}}%%
@@ -698,7 +709,7 @@ flowchart TB
     Z3 --> LLM
 ```
 
-## Cloud Platform Comparison Matrix
+## Cloud Platform Comparison
 
 | Capability | Azure | AWS | GCP |
 |---|---|---|---|
@@ -714,42 +725,53 @@ flowchart TB
 | Observability | App Insights, Log Analytics | CloudWatch, X-Ray | Cloud Logging, Monitoring |
 | Network isolation | VNet + Private Endpoints | VPC + PrivateLink | VPC + Private Service Connect |
 
-## Layer Descriptions
+## Architecture Layers
 
 ### Client Layer
-Entry points for end users and systems: web/mobile apps, internal tooling (e.g. Copilot plugins), and third-party API consumers.
+Entry points for end users and systems: web applications, internal portals, enterprise copilots, and third-party API consumers.
 
 ### API Gateway & Security
-- **API Gateway** — authentication, rate limiting, WAF protection.
+- **API gateway** — authentication, rate limiting, and traffic control.
 - **IAM / SSO / OAuth2** — identity and access control.
-- **PII Redaction / DLP Filter** — strips or masks sensitive data before it reaches the orchestrator.
+- **DLP and PII controls** — prevent sensitive data from reaching the orchestrator or model layer without policy enforcement.
 
 ### Orchestration Layer
-- **AI Orchestrator** — coordinates prompt construction, retrieval, model routing, and response assembly (e.g. LangChain, Semantic Kernel).
-- **Model Router** — chooses between local and external LLMs based on policy, cost, latency, and data sensitivity.
-- **Semantic Cache** — avoids redundant model calls for repeated/similar queries.
-- **Prompt Template & Guardrails Engine** — enforces prompt structure, safety filters, and output validation.
+- **AI orchestrator** — coordinates prompt construction, retrieval, model routing, and response assembly.
+- **Model router** — chooses between local and external LLMs based on policy, cost, latency, and data sensitivity.
+- **Semantic cache** — avoids redundant model calls for repeated or similar queries.
+- **Prompt and guardrails engine** — enforces prompt structure, safety filters, and output validation.
 
 ### RAG Pipeline
-- **Ingestion** — document loaders pull from enterprise sources, chunk content, and generate embeddings for indexing.
-- **Vector Database** — stores embeddings (e.g. Azure AI Search, Pinecone, pgvector).
-- **Retriever** — hybrid search (vector + keyword) with reranking, triggered at query time via a query embedding model.
+- **Ingestion** — document loaders pull from enterprise sources, normalize content, and generate embeddings for indexing.
+- **Vector database** — stores embeddings and supports hybrid search and semantic retrieval.
+- **Retriever** — combines vector and keyword search with reranking before grounding the model response.
 
 ### Model Layer
-- **Local / Private LLMs** — self-hosted or fine-tuned models (Llama, Mistral, Phi) served via vLLM/TGI on a GPU cluster; used for sensitive or offline workloads.
-- **External LLM Providers** — OpenAI/Azure OpenAI, Anthropic Claude, Google Gemini; used for general-purpose, high-capability tasks.
+- **Local / private LLMs** — self-hosted or fine-tuned models served on private GPU infrastructure for sensitive, regulated, or offline workloads.
+- **External / managed LLMs** — managed providers used for general-purpose tasks requiring broad capability.
 
 ### Enterprise Data Sources
-Structured databases, document stores (SharePoint, wikis), and internal/external APIs feeding the ingestion pipeline.
+Structured databases, document repositories, and SaaS or internal APIs feed the ingestion and grounding pipeline.
 
 ### Observability, Governance & Ops
-- **Logging & Tracing** — end-to-end request tracing (OpenTelemetry).
-- **Evaluation & Feedback Loop** — quality scoring and human feedback capture.
-- **Cost & Usage Monitoring** — tracks spend and usage per model/route.
-- **Compliance / Audit Trail** — records access and decisions for regulatory needs.
+- **Logging and tracing** — end-to-end request visibility.
+- **Evaluation and feedback** — quality scoring and human feedback capture.
+- **Cost and usage monitoring** — spend, latency, and route selection by model.
+- **Compliance and audit** — access records and decision traceability for regulated workloads.
 
-## Routing Logic Summary
-| Condition | Routed To |
+## Routing Logic
+
+| Condition | Preferred route |
 |---|---|
-| Sensitive/regulated data, offline requirement, cost-sensitive high-volume | Local LLM |
-| General reasoning, high capability, low data sensitivity | External LLM |
+| Sensitive or regulated data, offline requirement, or cost-sensitive high-volume workloads | Local / private LLM |
+| General reasoning, broad capability, and lower data sensitivity | External / managed LLM |
+
+## Final Notes
+
+This architecture balances three enterprise priorities:
+
+- Security and compliance
+- Performance and cost control
+- Quality and governability through RAG, evaluation, and telemetry
+
+Separating ingestion, retrieval, orchestration, model selection, and monitoring keeps the platform modular, auditable, and scalable as AI workloads mature.
