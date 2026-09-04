@@ -369,6 +369,55 @@ In practice, this lifecycle sits across the platform architecture as follows:
 - Secure deployment is enforced through API gateway, identity, WAF, DLP, and audit controls.
 - Monitoring and feedback close the loop with telemetry, cost tracking, drift detection, and content refresh.
 
+### SDLC Overlay on the Azure Architecture
+
+```mermaid
+flowchart LR
+    subgraph SDLC["Standardized AI SDLC"]
+        A["1. Business Goal & Risk"] --> B["2. Data & Governance"]
+        B --> C["3. Model Selection"]
+        C --> D["4. RAG / Prompting"]
+        D --> E["5. Evaluation & Testing"]
+        E --> F["6. Secure Deployment"]
+        F --> G["7. Monitor & Feedback"]
+        G --> A
+    end
+
+    subgraph ARCH["Azure AI Platform"]
+        P1["Business Use Cases"]
+        P2["Enterprise Data & Policies"]
+        P3["Model Router"]
+        P4["RAG + Guardrails"]
+        P5["External / Private LLMs"]
+        P6["API Gateway + WAF + Entra ID"]
+        P7["Observability + Audit"]
+    end
+
+    A --> P1
+    B --> P2
+    C --> P3
+    D --> P4
+    D --> P5
+    E --> P7
+    F --> P6
+    G --> P7
+    P7 --> B
+
+    classDef stage fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#082f49;
+    classDef core fill:#e9d5ff,stroke:#7c3aed,stroke-width:2px,color:#2e1065;
+    classDef data fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d;
+    classDef sec fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d;
+    classDef obs fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006;
+
+    class A,B,C,D,E,F,G stage;
+    class P1,P2,P3,P4,P5 core;
+    class P2 data;
+    class P6 sec;
+    class P7 obs;
+```
+
+This overlay makes the SDLC visible as a lifecycle that governs the architecture rather than as a disconnected process. The platform provides the execution path, while the SDLC governs data, model choice, evaluation, deployment, and continuous improvement.
+
 ## Additional Cloud-Native Variants
 
 ### 4) AWS-Native Architecture
